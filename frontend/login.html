@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Login</title>
+        <link rel="stylesheet" href="../style_auth.css">
+        <script defer src="../login.js"></script>
+    </head>
+    <body>
+        <div class="auth-container">
+            <h2>Login to Student Hub</h2>
+            <form id="loginForm">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="your@email.com" required />
+
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" required />
+
+            <button id="submitButton" type="submit">Login</button>
+            </form>
+            <p>Don't have an account? <a href="/auth/register">Sign up here</a>.</p>
+    </div>
+    </body>
+</html>

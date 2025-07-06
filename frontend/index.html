@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../index.css">
+    <script defer src="../script.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="hamburger-menu" id="hamburgerMenu">
+            <button class="hamburger-btn" id="hamburgerBtn"><img id="hamburgerBtnImg" src="./icons/bars.svg" alt="Hamburger Menu"></button>
+            <nav class="hamburger-container" id="hamburgerContainer" style="display: none;">
+                <div><a href="#"> Popular Posts and Users</a></div>
+            </nav>
+        </div>
+        <a href="/" class="site-name">WebsiteName</a> <!--change name-->
+        <div class="auth-buttons" id="authButtons"> <!--dynamically inserted--> </div>
+    </header>
+
+    <div class="main">
+        <aside class="sidebar-left">
+            <div class="panel">
+                <h3>🔥 Most Popular Messages</h3>
+                <ul id="popularPostsList"></ul>
+            </div>
+
+            <div class="panel">
+                <h3>🏆 Top Users</h3>
+                <ul id="topUsersList"></ul>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="new-post">
+                <textarea type="textarea" class="post-text-area", id="postTextArea" placeholder="please insert text"></textarea>
+                <button type="button" id="submitPostButton" class="submit-post-button">Post</button>
+            </div>
+            <h1>CHAT</h1>
+            <div id="postContainer"> <!--dynamically inserted--> </div>
+        </main>
+    </div>
+
+    <!--When screen size doesn't meet requirements-->
+    <div class="invalid-display">
+        <h3>Screen size doesn't meet requirements</h3>
+    </div>
+
+    <footer class="footer">
+        <p>random copyright text</p>
+    </footer>
+
+    <!-- Login Required Modal -->
+    <div id="loginModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <p>You need to be logged in to perform this action.</p>
+            <div class="modal-buttons">
+                <button id="registerBtn2" class="modal-register">Register</button>
+                <button id="loginBtn2" class="modal-login">Log In</button>
+                <button id="closeModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
