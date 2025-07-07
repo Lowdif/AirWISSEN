@@ -22,7 +22,7 @@ body {
 }
 
 .hamburger-menu {
-  display: flex;
+  display: none;
   position: relative;
   top: 0;
   left: 0;
@@ -500,6 +500,10 @@ body {
 
 /* 📱 Mobile + Tablet Responsiveness */
 @media (max-width: 1024px) {
+  .hamburger-menu {
+    display: flex;
+  }
+  
   .main {
     grid-template-columns: 1fr; /* Stack everything vertically */
   }
@@ -524,6 +528,10 @@ body {
 }
 
 @media (max-width: 770px) {
+  .hamburger-menu {
+    display: flex;
+  }
+
   .hamburger-btn {
     padding: 20px 15px;
     margin: 0 20px 0 0;
@@ -582,6 +590,10 @@ body {
 }
 
 @media(max-width: 480px) {
+  .hamburger-menu {
+    display: flex;
+  }
+
   .header {
     padding-left: 5px;
     padding-right: 5px;

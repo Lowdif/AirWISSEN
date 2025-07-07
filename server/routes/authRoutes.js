@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
 });
 
 //Logout route
-router.post('logout', (req, res) => {
+router.post('/logout', (req, res) => {
     const accessToken = req.cookies.accessToken;
     const username = req.cookies.username;
 
