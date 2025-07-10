@@ -5,6 +5,10 @@ body {
   color: #ffffff;
 }
 
+.banned-txt{
+  text-decoration:line-through;
+}
+
 .invalid-display {
   display: none;
 }
@@ -186,9 +190,17 @@ body {
 }
 
 .post-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   position: relative;
   align-items: center;
+  margin-bottom: 10px;
+}
+
+.post-auth {
+  display: flex;
+  align-items: center;
+  position: relative;
   margin-bottom: 10px;
 }
 
@@ -295,6 +307,7 @@ body {
 }
 
 .reply {
+  display: flex;
   background-color: #3a3d41;
   padding: 8px 10px;
   margin-bottom: 6px;
@@ -302,17 +315,30 @@ body {
   color: #ccc;
 }
 
+.reply-meta {
+  display: flex;
+}
+
+.reply-meta strong, p {
+  display: flex;
+  margin: 0 3px 0 0;
+}
+
 .replies {
+  position: relative;
   margin-top: 15px;
   padding-left: 20px;
   border-left: 2px solid #555;
 }
 
+.replies button{
+  position:absolute;
+  right: 100%;
+}
+
 .more-container {
-  display: flex;
-  position: absolute;
-  top: 0;
-  right: 0;
+  display: inline-block;
+  position: relative;
   justify-content: center;
 }
 
@@ -410,7 +436,7 @@ body {
 /****************************/
 /* CSS for page body (end) */
 
-/* CSS for page footer (start) */
+/* CSS for page footer */
 .footer {
   background-color: #23272a;
   color: #ccc;
@@ -458,6 +484,7 @@ body {
 
 .modal-buttons button:hover {
   background-color: #5b6eae;
+  color: #fff;
 }
 
 .modal-register {
@@ -492,18 +519,25 @@ body {
   padding: 0;
 }
 
-.modal-close-btn:hover {
-  color: #fff;
+.ban-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
-/****************************/
-/* CSS for page footer (end) */
 
 /* 📱 Mobile + Tablet Responsiveness */
 @media (max-width: 1024px) {
   .hamburger-menu {
     display: flex;
   }
-  
+
   .main {
     grid-template-columns: 1fr; /* Stack everything vertically */
   }
@@ -642,7 +676,7 @@ body {
 }
 
 @media (max-width: 320px) {
-  .main, .header, .footer, .modal-overlay, .modal-content {
+  .main, .header, .footer, .ban-modal-overlay, .modal-overlay, .modal-content {
     display: none;
   }
 

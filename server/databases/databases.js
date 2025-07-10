@@ -9,7 +9,8 @@ userDb.prepare(
         email TEXT NOT NULL UNIQUE,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL, 
-        banned INTEGER NOT NULL
+        banned INTEGER NOT NULL,
+        role TEXT NOT NULL
     );`
 ).run();
 

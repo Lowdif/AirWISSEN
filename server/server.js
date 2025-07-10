@@ -10,38 +10,28 @@ app.use(express.json());
 app.use(cookieParser());
 
 const authRoutes = require('./routes/authRoutes');
-const modRoutes = require('./routes/modRoutes');
 const postsRoutes = require('./routes/postsRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 //Authantification and Authorization related Routes
 app.use('/auth', authRoutes);
 
-//Moderation Routes
-app.use('/mod', modRoutes);
-
 //Posts related Routes
 app.use('/posts', postsRoutes);
+
+//Administration page Route
+app.use('/admin', adminRoutes);
 
 //serve static files
 app.use(express.static(publicFilesPath));
 
 //HOMEPAGE ROUTE
-app.get('/', (req, res) => {
-    res.status(200).sendFile(publicFilesPath + '/index.html');
-});
-
-//REGISTER ROUTE
-app.get('/auth/register', (req, res) => {
-    res.status(200).sendFile(publicFilesPath + '/register.html');
-});
-
-//REGISTER ROUTE
-app.get('/auth/login', (req, res) => {
-    res.status(200).sendFile(publicFilesPath + '/login.html');
+app.get('/', async (req, res) => {
+    res.status(200).sendFile(publicFilesPath + '/html/index.html');
 });
 
 app.use((req, res) => {
-    res.status(404).json({sucess: false, message: `${req.method} ${req.originalUrl} route doesn't exist`});
+    res.status(404).json({success: false, message: `${req.method} ${req.originalUrl} route doesn't exist`});
 });
 
 app.listen(5000, () => {

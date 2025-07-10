@@ -7,6 +7,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
   const pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
+  
   if (!pattern.test(email)) {
     alert('Please enter a valid email.');
     button.disabled = false;
