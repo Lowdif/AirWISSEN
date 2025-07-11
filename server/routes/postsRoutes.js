@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
         }
         catch(err) {
             if(err.name == 'TokenExpiredError') {
-                return res.status(401).json({success: false, message: 'Expired access token provided'});
+                return res.status(401).json({success: false, message: 'Expired access token provided. Please try reloading the page.'});
             }
             console.error(err);
         }
@@ -49,9 +49,8 @@ router.get('/', (req, res) => {
             let user_vote = 0;
             if(currentUser != null) {
                 isSelfPost = currentUser == user.username;
-                detailedReplies = Replies.map(reply => {
-                    const isSelfReply = currentUser == user.username;
-                    return {...reply, isSelf: isSelfReply};
+                detailedReplies.forEach(reply => {
+                    reply.isSelf = currentUser == reply.author_username;
                 });
                 const tempUserVote = db.prepare('SELECT vote_value FROM votes WHERE author_username = ? AND post_id = ?').get(currentUser, post.id);
                 if(tempUserVote) user_vote = tempUserVote.vote_value;

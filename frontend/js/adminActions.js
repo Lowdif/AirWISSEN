@@ -25,8 +25,9 @@ async function deleteReply(post, reply) {
     }
     loadPosts();
 }
-async function banUser(post) {
-    const res = await fetchWithRetry(`http://localhost:5000/admin/ban/${post.author_username}`, {
+
+async function banUser(username) {
+    const res = await fetchWithRetry(`http://localhost:5000/admin/ban/${username}`, {
         method: 'DELETE',
         credentials: 'include',
     });

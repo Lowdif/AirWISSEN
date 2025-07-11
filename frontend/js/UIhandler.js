@@ -1,6 +1,6 @@
 import { isLoggedIn, isAdmin } from "./userStatus.js";
 import { submitReply, submitVote } from "./apis.js";
-import { deletePost, banUser } from "./adminActions.js";
+import { deletePost, banUser, deleteReply } from "./adminActions.js";
 import { showLoginModal } from "./dynamicUI.js";
 
 function createPost(post, timeStamp) {
@@ -101,7 +101,7 @@ function createPost(post, timeStamp) {
 
     repliesDiv.className = 'replies';
     post.replies.forEach(reply => {
-        addReplyToUI(repliesDiv, reply, post);
+        addReplyToUI(repliesDiv, post, reply);
     });
     
     actions.className = 'post-actions';
@@ -136,7 +136,8 @@ function createPost(post, timeStamp) {
         postAuthor.classList.remove('banned-txt');
         postMessage.classList.remove('banned-txt');
     }
-    createAdminUI(postHeader, post);
+
+    postsModerationUI(postHeader, post);
 
     actions.appendChild(upVoteBtn);
     actions.appendChild(voteCount);
@@ -164,63 +165,100 @@ function createPost(post, timeStamp) {
     return postEl;
 }
 
-async function createAdminUI(container, post) {
+async function postsModerationUI(container, post) {
     if(post.isSelf) return;
     const isAdministrator = await isAdmin();
-    if(isAdministrator) {
-        const moreContainer = document.createElement('div');
-        const moreOptions = document.createElement('div');
-        const removePostBtn = document.createElement('button');
-        const banUserBtn = document.createElement('button');
-        const moreBtn = document.createElement('button');
-        const moreIcon = '<img class = "more-icon" src="./icons/more.svg" alt="User Icon" width="8" height="16"></img>';
-        moreContainer.className = 'more-container';
-        removePostBtn.textContent = 'Remove Post';
-        removePostBtn.onclick = () => {
-            deletePost(post);
-        }
-        banUserBtn.textContent = 'Ban User';
-        banUserBtn.onclick = () => {
-            banUser(post);
-        }
-        moreOptions.className = 'more-options';
-        moreOptions.appendChild(removePostBtn);
-        moreOptions.appendChild(banUserBtn);
-        moreOptions.style.display = 'none';
-        moreBtn.className = 'more-btn';
-        moreBtn.innerHTML = moreIcon;
-        moreBtn.onclick = () => {
-            moreOptions.style.display = moreOptions.style.display == 'none' ? 'block' : 'none';
-        };
-        moreContainer.appendChild(moreBtn);
-        moreContainer.appendChild(moreOptions);
-        container.appendChild(moreContainer);
-        document.addEventListener('click', e => {
-            if(!moreContainer.contains(e.target) && moreOptions.style.display === 'block') moreOptions.style.display =  'none';
-        });
+    if(!isAdministrator) return;
+
+    const moreContainer = document.createElement('div');
+    const moreOptions = document.createElement('div');
+    const removePostBtn = document.createElement('button');
+    const banUserBtn = document.createElement('button');
+    const moreBtn = document.createElement('button');
+    const moreIcon = '<img class = "more-icon" src="./icons/more.svg" alt="User Icon" width="8" height="16"></img>';
+    moreContainer.className = 'more-container';
+    removePostBtn.textContent = 'Remove Post';
+    removePostBtn.onclick = () => {
+        deletePost(post);
     }
+    banUserBtn.textContent = 'Ban User';
+    banUserBtn.onclick = () => {
+        banUser(post.author_username);
+    }
+    moreOptions.className = 'more-options';
+    moreOptions.appendChild(removePostBtn);
+    moreOptions.appendChild(banUserBtn);
+    moreOptions.style.display = 'none';
+    moreBtn.className = 'more-btn';
+    moreBtn.innerHTML = moreIcon;
+    moreBtn.onclick = () => {
+        moreOptions.style.display = moreOptions.style.display == 'none' ? 'block' : 'none';
+    };
+    moreContainer.appendChild(moreBtn);
+    moreContainer.appendChild(moreOptions);
+    container.appendChild(moreContainer);
+    document.addEventListener('click', e => {
+        if(!moreContainer.contains(e.target) && moreOptions.style.display === 'block') moreOptions.style.display =  'none';
+    });
 }
 
-function addReplyToUI(container, Reply) {
-  const reply = document.createElement('div');
-  const text = document.createElement('p');
-  const replyMeta = document.createElement('div');
+async function repliesModerationUI(container, post, reply) {
+    if(reply.isSelf) return;
+    const isAdministrator = await isAdmin();
+    if(!isAdministrator) return;
 
-  replyMeta.className = 'reply-meta';
+    const moreContainer = document.createElement('div');
+    const moreOptions = document.createElement('div');
+    const removeReplyBtn = document.createElement('button');
+    const banUserBtn = document.createElement('button');
+    const moreBtn = document.createElement('button');
+    const moreIcon = '<img class = "more-icon" src="./icons/more.svg" alt="User Icon" width="8" height="16"></img>';
+    moreContainer.className = 'more-container';
+    removeReplyBtn.textContent = 'Remove Reply';
+    removeReplyBtn.onclick = () => {
+        deleteReply(post, reply);
+    }
+    banUserBtn.textContent = 'Ban User';
+    banUserBtn.onclick = () => {
+        banUser(reply.author_username);
+    }
+    moreOptions.className = 'more-options';
+    moreOptions.appendChild(removeReplyBtn);
+    moreOptions.appendChild(banUserBtn);
+    moreOptions.style.display = 'none';
+    moreBtn.className = 'more-btn';
+    moreBtn.innerHTML = moreIcon;
+    moreBtn.onclick = () => {
+        moreOptions.style.display = moreOptions.style.display == 'none' ? 'block' : 'none';
+    };
+    moreContainer.appendChild(moreBtn);
+    moreContainer.appendChild(moreOptions);
+    container.appendChild(moreContainer);
+    document.addEventListener('click', e => {
+        if(!moreContainer.contains(e.target) && moreOptions.style.display === 'block') moreOptions.style.display =  'none';
+    });
+}
 
-  reply.className = 'reply';
-  reply.role = 'comment';
+async function addReplyToUI(container, Post, Reply) {
+    const reply = document.createElement('div');
+    const text = document.createElement('div');
+    const replyHeader = document.createElement('div');
 
-  text.className = 'reply-text';
-  text.textContent = Reply.content
+    replyHeader.className = 'reply-header';
 
-  const strong = document.createElement('strong');
-  strong.textContent = `${Reply.author_username}:`;
+    reply.className = 'reply';
+    reply.role = 'comment';
 
-  replyMeta.appendChild(strong);
-  replyMeta.appendChild(text);
-  reply.appendChild(replyMeta);
-  createAdminUI(reply, Reply);
+    text.className = 'reply-text';
+    text.textContent = Reply.content;
+
+    const strong = document.createElement('strong');
+    strong.textContent = `${Reply.author_username}:`;
+
+    replyHeader.appendChild(strong);
+    repliesModerationUI(replyHeader, Post, Reply);
+    reply.appendChild(replyHeader);
+    reply.appendChild(text);
 
   container.appendChild(reply);
 }
@@ -272,4 +310,4 @@ function updateSidebars(posts) {
     }
 }
 
-export { createPost, addReplyToUI, updateSidebars, createAdminUI };
+export { createPost, addReplyToUI, updateSidebars, postsModerationUI, repliesModerationUI };

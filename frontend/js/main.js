@@ -15,8 +15,5 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPosts();
 });
 
-
-/*
-//polling
-setInterval(loadPosts, 30000);
-*/
+//polling (actualizes page every minute)
+setInterval(loadPosts, 60000);

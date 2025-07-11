@@ -1,0 +1,49 @@
+.more-container {
+  display: flex;
+  position: relative;
+  justify-content: center;
+}
+
+.more-options {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background:rgba(44, 44, 44, 0.76);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.more-btn, .more-options button {
+  display: flex;
+  background-color: #7289da;
+  border: none;
+  color: white;
+  padding: 3px 3px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+
+.more-btn {
+  align-content: center;
+  max-height: 22px;
+}
+
+.more-options button{
+  width: 100px;
+  margin: 5px;
+}
+
+.more-btn:hover, .more-options button:hover {
+  background-color: #5b6eae;
+}
+
+.more-options a{
+  text-decoration: none;
+  color: white;
+}
