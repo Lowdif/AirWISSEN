@@ -1,10 +1,12 @@
 import { isLoggedIn, isAdmin } from "./userStatus.js";
-import { submitReply, submitVote } from "./apis.js";
+import { loadPosts, submitReply, submitVote } from "./apis.js";
 import { deletePost, banUser, deleteReply } from "./adminActions.js";
 import { showLoginModal } from "./dynamicUI.js";
+import { unbanUser } from "./admin.js";
 
+let expendedReplies = {};
 function createPost(post, timeStamp) {
-
+    let numberOfReplies = expendedReplies[post.id] == true? 'all' : 5;
     const postEl = document.createElement('article');
     const postHeader = document.createElement('div');
     const postMeta = document.createElement('div');
@@ -100,10 +102,35 @@ function createPost(post, timeStamp) {
     replyBox.style.display = 'none';
 
     repliesDiv.className = 'replies';
-    post.replies.forEach(reply => {
+
+    const moreReplies = document.createElement('button');
+    moreReplies.textContent = expendedReplies[post.id] == true? 'Less...' : 'More...';
+    moreReplies.style.display = post.replies.length <= numberOfReplies ? 'none' : 'flex';
+    moreReplies.className = 'more-replies-btn';
+    moreReplies.onclick = () => {
+        if(moreReplies.textContent == 'More...') {
+            moreReplies.textContent = 'Less...';
+            expendedReplies[post.id] = true;
+            loadPosts();
+        }
+        else {
+            moreReplies.textContent = 'More...';
+            expendedReplies[post.id] = false;
+            loadPosts();
+        }
+        const end = numberOfReplies == 'all' ? post.replies.length : numberOfReplies;
+        post.replies.slice(0, end).forEach(reply => {
+        addReplyToUI(repliesDiv, post, reply);
+        });
+        repliesDiv.appendChild(moreReplies);
+    };
+    
+    const end = numberOfReplies == 'all' ? post.replies.length : numberOfReplies;
+        post.replies.slice(0, end).forEach(reply => {
         addReplyToUI(repliesDiv, post, reply);
     });
-    
+    repliesDiv.appendChild(moreReplies);
+
     actions.className = 'post-actions';
 
     voteCount.className = 'vote-count';
@@ -173,7 +200,6 @@ async function postsModerationUI(container, post) {
     const moreContainer = document.createElement('div');
     const moreOptions = document.createElement('div');
     const removePostBtn = document.createElement('button');
-    const banUserBtn = document.createElement('button');
     const moreBtn = document.createElement('button');
     const moreIcon = '<img class = "more-icon" src="./icons/more.svg" alt="User Icon" width="8" height="16"></img>';
     moreContainer.className = 'more-container';
@@ -181,13 +207,9 @@ async function postsModerationUI(container, post) {
     removePostBtn.onclick = () => {
         deletePost(post);
     }
-    banUserBtn.textContent = 'Ban User';
-    banUserBtn.onclick = () => {
-        banUser(post.author_username);
-    }
     moreOptions.className = 'more-options';
     moreOptions.appendChild(removePostBtn);
-    moreOptions.appendChild(banUserBtn);
+    moreOptions.appendChild(dynamicBanBtn(post.banStatus == 'banned', post));
     moreOptions.style.display = 'none';
     moreBtn.className = 'more-btn';
     moreBtn.innerHTML = moreIcon;
@@ -200,6 +222,14 @@ async function postsModerationUI(container, post) {
     document.addEventListener('click', e => {
         if(!moreContainer.contains(e.target) && moreOptions.style.display === 'block') moreOptions.style.display =  'none';
     });
+}
+
+function dynamicBanBtn(isBanned, post) {
+    const btn = document.createElement('button');
+    btn.textContent = isBanned == true? 'Unban User ' : 'Ban User';
+    btn.onclick = isBanned == true? () => { unbanUser(post.author_username); loadPosts() } : 
+    () => { banUser(post.author_username); };
+    return btn;
 }
 
 async function repliesModerationUI(container, post, reply) {
@@ -263,19 +293,16 @@ async function addReplyToUI(container, Post, Reply) {
   container.appendChild(reply);
 }
 
-function updateSidebars(posts) {
+function updateSidebars(popularPosts, popularUsers) {
     try {
         const popularPostsList = document.getElementById('popularPostsList');
         const topUsersList = document.getElementById('topUsersList');
 
-        //Popular posts list
         if(!popularPostsList || !topUsersList) throw new Error('Failed to load side bar, please try again');
-        const populars = [...posts]
-        .sort((a, b) => ((b.upVotes || 0) - (b.downVotes || 0)) - ((a.upVotes || 0) - (a.downVotes || 0)))
-        .slice(0, 5);
 
+        //Popular posts list
         popularPostsList.innerHTML = '';
-        populars.forEach(popular => {
+        popularPosts.forEach(popular => {
             const strong = document.createElement('strong');
             const p = document.createElement('p');
             const div = document.createElement('div');
@@ -283,24 +310,19 @@ function updateSidebars(posts) {
             popularPost.className = 'popular-post';
             strong.textContent = `${popular.author_username}`;
             p.textContent = `${popular.content.slice(0, 70)}${popular.content.length > 70 ? '...' : ''}`;
-            div.textContent = `${(popular.upVotes || 0) - (popular.downVotes || 0)}`;
+            const totalLikes = (popular.upVotes || 0) - (popular.downVotes || 0);
+            div.textContent = `${totalLikes} like${totalLikes > 1 || totalLikes < -1 ? 's' : ''}`;
             popularPost.appendChild(strong);
             popularPost.appendChild(p);
             popularPost.appendChild(div);
             popularPostsList.appendChild(popularPost);
         });      
         
-        //Top user list
-        const scores = {};
-        posts.forEach(post => {
-            scores[post.author_username] = (scores[post.author_username] || 0) + ((post.upVotes || 0) - (post.downVotes || 0));
-        });
-
+        //Popular users list
         topUsersList.innerHTML = '';
-        const topUsers = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        topUsers.forEach(topUser => {
+        popularUsers.forEach(topUser => {
             const li = document.createElement('li');
-            li.textContent = `${topUser[0]} (${topUser[1]} total likes)`;
+            li.textContent = `${topUser[0]} (${topUser[1]} total like${topUser[1] > 1 || topUser[1] < -1 ? 's' : ''})`;
             topUsersList.appendChild(li);
         });
     }

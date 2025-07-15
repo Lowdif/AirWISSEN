@@ -30,6 +30,10 @@ app.get('/', async (req, res) => {
     res.status(200).sendFile(publicFilesPath + '/html/index.html');
 });
 
+app.get('/populars', async (req, res) => {
+    res.status(200).sendFile(publicFilesPath + '/html/populars.html');
+});
+
 app.use((req, res) => {
     res.status(404).json({success: false, message: `${req.method} ${req.originalUrl} route doesn't exist`});
 });

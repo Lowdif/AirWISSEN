@@ -1,6 +1,7 @@
 const bannedContainer = document.getElementById('bannedContainer');
 
 async function loadBans() {
+    if(!bannedContainer) return;
     const res = await fetch('http://localhost:5000/admin/bannedUsers');
     if(!res.ok) {
         const msg = await res.text();
@@ -32,7 +33,6 @@ async function unbanUser(username) {
         return;
     }
     loadBans();
-    window.location.reload();
 }
 
 function createBans(bannedUser) {
@@ -44,8 +44,9 @@ function createBans(bannedUser) {
 
     unbanBtn.className = 'unban-btn';
     unbanBtn.innerText = 'Unban User';
-    unbanBtn.onclick = () => {
-        unbanUser(bannedUser.username);
+    unbanBtn.onclick = async () => {
+        await unbanUser(bannedUser.username);
+        loadBans();
     };
 
     profilePicture.className = 'profile-picture';
@@ -66,3 +67,5 @@ function createBans(bannedUser) {
 }
 
 loadBans();
+
+export { unbanUser };

@@ -44,6 +44,12 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
+.popular-post strong, p {
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
 @media (max-width: 1024px) {
     .sidebar-left {
         display: none; /* Hide sidebars on small screens */

@@ -6,6 +6,9 @@ import { formatTimeStamp } from "./timestampFormater.js";
 const postContainer = document.getElementById('postContainer');
 const submitPostBtn = document.getElementById('submitPostButton');
 const postTextArea = document.getElementById('postTextArea');
+const morePostsBtn = document.getElementById('morePostsBtn');
+let numberOfPosts = 10;
+let numberOfPopulars = 5;
 
 async function submitPost() {
     const postContent = postTextArea.value;
@@ -95,7 +98,7 @@ async function submitReply(content, post_id) {
 }
 
 async function loadPosts() {
-    const res = await fetchWithRetry('http://localhost:5000/posts/', {
+    const res = await fetchWithRetry(`http://localhost:5000/posts/${numberOfPosts}`, {
         method: 'GET',
         credentials: 'include',
     });
@@ -109,12 +112,43 @@ async function loadPosts() {
 
     try {
         const data = await res.json();
+        const posts = data.detailedPosts;
+        morePostsBtn.textContent = data.isAllPosts ? 'Less...' : 'More...';
+        morePostsBtn.style.display = (data.isAllPosts && posts.length <= numberOfPosts) ? 'none' : 'flex';
+
         postContainer.innerHTML = '';
-        data.forEach(post => {
+        const end = numberOfPosts == 'all' ? posts.length : numberOfPosts;
+        posts.slice(0, end).forEach(post => {
             const timeStamp = formatTimeStamp(new Date(post.timeStamp));
             postContainer.appendChild(createPost(post, timeStamp));
         });
-        updateSidebars(data);
+        loadSidebars();
+    }
+    catch(err) {
+        console.error(err);
+        alert('Something went wrong when trying to load the page. Please try again.')
+    }
+}
+
+async function loadSidebars() {
+    const res = await fetchWithRetry(`http://localhost:5000/posts/populars/${numberOfPopulars}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+
+    if(!res.ok) {
+        const msg = await res.json();
+        console.error('Something went wrong: ' + msg.message);
+        alert(msg.message);
+        return;
+    }
+
+    try {
+        const data = await res.json();
+        const popularPosts = data.popularPosts;
+        const popularUsers = data.popularUsers;
+
+        updateSidebars(popularPosts, popularUsers);
     }
     catch(err) {
         console.error(err);
@@ -154,6 +188,19 @@ function initSubmitPostBtn() {
     }
 }
 
+function initMorePostsBtn() {
+    morePostsBtn.onclick = () => { 
+        if(morePostsBtn.innerText == 'More...') {
+            numberOfPosts = 'all';
+            loadPosts();
+        }
+        else {
+            numberOfPosts = 10;
+            loadPosts();
+        }
+    };
+}
+
 async function logout() {
     const res = await fetchWithRetry('http://localhost:5000/auth/logout', {
         method: 'POST',
@@ -166,4 +213,4 @@ async function logout() {
     } 
 }
 
-export { submitPost, submitReply, submitVote, loadPosts, fetchWithRetry, initSubmitPostBtn, logout };
+export { submitPost, submitReply, submitVote, loadPosts, fetchWithRetry, initSubmitPostBtn, initMorePostsBtn, logout };

@@ -1,4 +1,4 @@
-import { loadPosts, initSubmitPostBtn } from './apis.js';
+import { loadPosts, initSubmitPostBtn, initMorePostsBtn } from './apis.js';
 import { initModals, dynamicHamburgerBtn, dynamicAuthBtns } from './dynamicUI.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //init UI
     initModals();
     initSubmitPostBtn();
+    initMorePostsBtn();
 
     //initial Posts load when entering the page
     loadPosts();

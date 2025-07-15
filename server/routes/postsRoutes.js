@@ -9,7 +9,8 @@ const { authantificateToken } = require('./middleware');
 const { verifyBanStatus } = require('./middleware');
 
 //GET POSTS ROUTE
-router.get('/', (req, res) => {
+router.get('/:numberOfPosts', (req, res) => {
+    let numberOfPosts = req.params.numberOfPosts || 10;
     let currentUser = null;
     let banStatus = null;
     if(!req.cookies) return res.status(400).json({success: false, message: 'No cookies provided, please try logging in again.'});
@@ -27,7 +28,17 @@ router.get('/', (req, res) => {
         }
     }
     try {
-        const posts = db.prepare('SELECT * FROM posts ORDER BY id DESC').all();
+        let posts = null;
+        let isAllPosts = false;
+        const totalNumberOfPosts = db.prepare('SELECT COUNT(*) AS total FROM posts').get();
+        
+        if(numberOfPosts == 'all' || numberOfPosts >= totalNumberOfPosts.total) {
+            posts = db.prepare('SELECT * FROM posts ORDER BY id DESC').all();
+            isAllPosts = true;
+        } else {
+            posts = db.prepare('SELECT * FROM posts ORDER BY id DESC LIMIT ?').all(numberOfPosts);
+        }
+        
         const detailedPosts = posts.map(post => {
             let isSelfPost = false;
             const user = userDb.prepare('SELECT * FROM users WHERE username = ?').get(post.author_username);
@@ -38,6 +49,7 @@ router.get('/', (req, res) => {
                     return {...reply, isSelf: isSelfReply};
             });
             const votes = db.prepare('SELECT * FROM votes WHERE post_id = ?').all(post.id);
+            
             //post upvotes and downvotes
             let upVotes = 0, downVotes = 0;
             for (const vote of votes) {
@@ -57,7 +69,46 @@ router.get('/', (req, res) => {
             }
             return { ...post, replies: detailedReplies, upVotes, downVotes, user_vote, banStatus, isSelf: isSelfPost };
         });
-        return res.status(200).json(detailedPosts);
+
+        return res.status(200).json({ detailedPosts, isAllPosts });
+    }
+    catch(err) {
+        console.error(err);
+        return res.status(500).json({success: false, message: "Server Error"});
+    }
+});
+
+router.get('/populars/:limit', (req, res) => {
+    let limit = req.params.limit || 10;
+
+    if(limit == 'all') limit = 10;
+    else if(limit > 10 || limit < 1) limit = 10;
+    
+    try {     
+        //popular posts
+        const posts = db.prepare('SELECT * FROM posts ORDER BY id DESC').all();
+        const detailedPosts = posts.map(post => {
+            const votes = db.prepare('SELECT * FROM votes WHERE post_id = ?').all(post.id);
+            
+            let upVotes = 0, downVotes = 0;
+            for (const vote of votes) {
+                if(vote.vote_value === 1) upVotes += 1;
+                if(vote.vote_value === -1) downVotes += 1;
+            }
+
+            return { ...post, upVotes, downVotes };
+        });
+        detailedPosts.sort((a, b) => ((b.upVotes || 0) - (b.downVotes || 0)) - ((a.upVotes || 0) - (a.downVotes || 0)));
+
+        //popular users
+        const scores = {};
+        detailedPosts.forEach(post => {
+            scores[post.author_username] = (scores[post.author_username] || 0) + ((post.upVotes || 0) - (post.downVotes || 0));
+        });
+
+        const popularUsers = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, limit);
+        const popularPosts = detailedPosts.slice(0, limit);
+        return res.status(200).json({popularPosts, popularUsers});
     }
     catch(err) {
         console.error(err);
