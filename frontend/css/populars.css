@@ -30,10 +30,114 @@ body {
 
 .main {
     display: grid;
-    grid-template-columns: 1fr;
-    min-height: calc(100vh - 100px); /* Full height minus header + footer */
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 100px);
     gap: 10px;
     overflow-x: hidden;
+}
+
+.popular-posts-main, .popular-users-main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.popular-txt p{
+    font-size: 40px;
+    padding: 5px;
+    margin: 5px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.popular-txt {
+    display: flex;
+    height: min-content;
+    margin: 2dvh 1dvw 2dvh 1dvw;
+    background-color:#202427;
+    border-radius: 20px;
+    justify-content: center;
+}
+
+.popular-post {
+    display: flex;
+    flex-direction: row;
+    background-color: #424549;
+    padding: 16px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+    position: relative;
+    align-items: center;
+}
+
+.popular-user {
+    display: flex;
+    flex-direction: row;
+    background-color: #424549;
+    padding: 16px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+    position: relative;
+    align-items: center;
+}
+
+.popular-post-container, .popular-user-container {
+    margin: 0 1dvw 2dvh 1dvw;
+    background-color:#202427;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.popular-post-header, .popular-user-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.popular-post-content {
+    color: #ccc;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.popular-user-content {
+    margin: 0;
+    width: max-content;
+    padding: 0 5px 0 5px;
+    margin-right: 10px;
+    position: absolute;
+    right: 0;
+}
+
+.popular-post-likes {
+    display: flex;
+    position: absolute;
+    right: 0;
+    padding: 10px;
+    margin-right: 10px;
 }
 
 .footer {
@@ -42,6 +146,21 @@ body {
     text-align: center;
     padding: 15px;
     font-size: 14px;
+}
+
+@media (max-width: 770px) {
+    .popular-txt p {
+        font-size: 30px;
+    }
+    .main {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .popular-txt p {
+        font-size: 15px;
+    }
 }
 
 @media (max-width: 320px) {

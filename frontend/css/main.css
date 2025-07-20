@@ -107,11 +107,12 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.3s ease;
+    transition: background-color 1s, transform 0.5s ease;
 }
 
-.auth-buttons button:hover {
+.auth-buttons button:hover, .new-post button:hover {
     background-color: #5b6eae;
+    transform: scale(1.05, 1.05);
 }
 
 .main {
@@ -161,6 +162,7 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    transition: background-color 1s, transform 0.5s ease;
 }
 
 .footer {

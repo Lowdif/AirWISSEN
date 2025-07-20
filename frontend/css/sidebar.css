@@ -4,6 +4,10 @@
     color: #ccc;
 }
 
+.sidebar-left a {
+    text-decoration: none;
+}
+
 .sidebar-left section {
     margin-bottom: 20px;
 }
@@ -29,10 +33,17 @@
     margin: 0;
 }
 
-.sidebar-left .panel li {
+.sidebar-left .panel li, p {
     color: #ccc;
     margin-bottom: 8px;
     font-size: 0.9em;
+    padding-left: 8px;
+}
+
+.sidebar-left .panel div, strong {
+    color: #fff;
+    margin-bottom: 8px;
+    font-size: 1em;
     padding-left: 8px;
 }
 

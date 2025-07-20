@@ -1,5 +1,6 @@
-import { loadPosts } from "./apis.js";
 import { fetchWithRetry } from "./apis.js";
+
+const socket = io();
 
 async function deletePost(post) {
     const res = await fetchWithRetry(`http://localhost:5000/admin/${post.id}`, {
@@ -10,7 +11,7 @@ async function deletePost(post) {
         const msg = await res.text();
         console.error('Something went wrong: ' + msg);
     }
-    loadPosts();
+    socket.emit('new post deleted');
 }
 
 //STILL NEEDS WORK
@@ -23,7 +24,7 @@ async function deleteReply(post, reply) {
         const msg = await res.text();
         console.error('Something went wrong: ' + msg);
     }
-    loadPosts();
+    socket.emit('new reply deleted');
 }
 
 async function banUser(username) {
@@ -36,7 +37,21 @@ async function banUser(username) {
         console.error('Something went wrong: ' + msg);
         return;
     }
-    loadPosts();
+    socket.emit('new user banned');
 }
 
-export { banUser, deletePost, deleteReply };
+async function unbanUser(username) {
+    const res = await fetch(`http://localhost:5000/admin/unban/${username}`, {
+        method: 'POST',
+        credentials: 'include'
+    });
+
+    if(!res.ok) {
+        const msg = await res.text();
+        console.error('Something went wrong: ' + msg);
+        return;
+    }
+    socket.emit('new user unbanned');
+}
+
+export { banUser, deletePost, deleteReply, unbanUser };

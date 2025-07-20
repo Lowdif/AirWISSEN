@@ -1,4 +1,6 @@
+import { unbanUser } from "./adminActions.js";
 const bannedContainer = document.getElementById('bannedContainer');
+const socket = io();
 
 async function loadBans() {
     if(!bannedContainer) return;
@@ -21,20 +23,6 @@ async function loadBans() {
     }
 }
 
-async function unbanUser(username) {
-    const res = await fetch(`http://localhost:5000/admin/unban/${username}`, {
-        method: 'POST',
-        credentials: 'include' //for cookies lateron (remove if i don't use cookies for admin auth)
-    });
-
-    if(!res.ok) {
-        const msg = await res.text();
-        console.error('Something went wrong: ' + msg);
-        return;
-    }
-    loadBans();
-}
-
 function createBans(bannedUser) {
     const banContainer = document.createElement('div');
     const bannedUsername = document.createElement('p');
@@ -46,7 +34,6 @@ function createBans(bannedUser) {
     unbanBtn.innerText = 'Unban User';
     unbanBtn.onclick = async () => {
         await unbanUser(bannedUser.username);
-        loadBans();
     };
 
     profilePicture.className = 'profile-picture';
@@ -66,6 +53,8 @@ function createBans(bannedUser) {
     return banContainer;
 }
 
+//initial Bans load
 loadBans();
 
-export { unbanUser };
+socket.on('new user banned', () => loadBans());
+socket.on('new user unbanned', () => loadBans());

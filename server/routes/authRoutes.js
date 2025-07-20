@@ -4,8 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const { userDb } = require('../databases/databases');
-const { cookiesSetup, isAdmin } = require('./middleware');
-const { publicFilesPath } = require('./middleware');
+const { cookiesSetup } = require('./middleware');
 
 function generateAccessToken(User) {
     return jwt.sign({ username: User.username, role: User.role }, process.env.ACCESS_TOKEN, {expiresIn: '10m'});
@@ -15,16 +14,6 @@ function generateRefreshToken(User) {
     return jwt.sign({ username: User.username, role: User.role }, process.env.REFRESH_TOKEN);
 }
 
-//REGISTER ROUTE
-router.get('/register', (req, res) => {
-    res.status(200).sendFile(publicFilesPath + '/html/register.html');
-});
-
-//REGISTER ROUTE
-router.get('/login', (req, res) => {
-    res.status(200).sendFile(publicFilesPath + '/html/login.html');
-});
-
 //Register route
 router.post('/register', async (req, res) => {
     if(!req.body) return res.status(400).json({success: false, message: "Request does not provide body"});
@@ -33,8 +22,10 @@ router.post('/register', async (req, res) => {
     if(!email || !password || !username) return res.status(400).json({success: false, message: "Invalid request body"});
     
     try {
-        const isPasswordOk = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
-        const isAdmin = process.env.ADMIN_EMAIL == email && isPasswordOk;
+        let isAdmin = false; 
+        if (process.env.ADMIN_EMAIL == email) {
+            isAdmin = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         const role = isAdmin? 'admin' : 'user';
         const user = { email, role, username, password: hashedPassword };
@@ -49,6 +40,7 @@ router.post('/register', async (req, res) => {
     catch (err) {
         
         if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+            console.error(err)
             if(err.message.includes('users.email')) return res.status(400).json({ success: false, message: 'Email already registered.'});
             else if(err.message.includes('users.username')) return res.status(400).json({success: false, message: 'Username already taken.'});
         }
@@ -65,7 +57,7 @@ router.post('/login', async (req, res) => {
 
     const user = userDb.prepare('SELECT * FROM users WHERE email = ?').get(email);
     if(!user) return res.status(400).json({success: false, message: "User not found"});
-    
+
     try {
         const result = await bcrypt.compare(password, user.password);
         if(!result) return res.status(401).json({success: false, message: "Invalid email and password combination"});
@@ -164,12 +156,12 @@ router.get('/tokens', (req, res) => {
 
     try {
         const rToken = userDb.prepare('SELECT * FROM bannedRefreshTokens WHERE value = ?').get(refreshToken);
-        if(rToken) return res.status(400).json({success: false, message: "Already used refresh token provided, please try logging in again.", isLoggedIn: false});
+        if(rToken) return res.status(403).json({success: false, message: "Already used refresh token provided, please try logging in again.", isLoggedIn: false});
         
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN, (err, user) => {
             if(err) {
                 console.error(err);
-                return res.status(400).json({success: false, message: "Invalid refresh token provided, please try logging in again.", isLoggedIn: false});
+                return res.status(403).json({success: false, message: "Invalid refresh token provided, please try logging in again.", isLoggedIn: false});
             }
             userDb.prepare('INSERT INTO bannedRefreshTokens (value) VALUES (?)').run(refreshToken);
             const accessToken = generateAccessToken(user);

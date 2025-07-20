@@ -60,7 +60,7 @@
 .post p {
     color: #ccc;
     line-height: 1.5;
-    word-wrap: break-word;
+    word-wrap: anywhere;
     overflow-wrap: break-word;
     white-space: pre-wrap; /* preserves line breaks */
 }
@@ -74,7 +74,7 @@
   cursor: pointer;
   font-weight: bold;
   font-size: 0.9em;
-  transition: background-color 0.2s ease;
+  transition: background-color 1s, transform 0.5s ease;
 }
 
 .vote-count {
@@ -115,11 +115,12 @@
     font-weight: bold;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 1s, transform 0.5s ease;
 }
 
-.reply-box button:hover, .reply-btn:hover, .vote-btn:hover, .more-posts-btn:hover {
+.reply-box button:hover, .reply-btn:hover, .vote-btn:hover, .more-posts-btn:hover, .more-replies-btn:hover {
     background-color: #5b6eae;
+    transform: scale(1.05, 1.05);
 }
 
 .reply-btn, .more-posts-btn, .more-replies-btn {
@@ -131,7 +132,7 @@
     cursor: pointer;
     font-weight: bold;
     font-size: 0.9em;
-    transition: background-color 0.2s ease;
+    transition: background-color 1s, transform 0.5s ease;
 }
 
 .reply {
@@ -180,6 +181,7 @@
     display: flex;
     justify-content: center;
     position: relative;
+    margin-top: 10px;
     left: 45%;
 }
 

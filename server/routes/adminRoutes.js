@@ -125,8 +125,4 @@ router.post('/unban/:username', isAdmin, (req, res) => {
     }
 });
 
-router.get('/', isAdmin, (req, res) => {
-    res.status(200).sendFile(publicFilesPath + '/html/admin.html');
-});
-
 module.exports = router;

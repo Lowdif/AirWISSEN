@@ -15,8 +15,8 @@ function showBanModal() { banModal.style.display = 'flex'; };
 function hideBanModal() { banModal.style.display = 'none'; }
 
 function initModals() {
-    loginBtn2.addEventListener('click', () => { hideLoginModal(); window.location.href = 'http://localhost:5000/auth/login'; });
-    registerBtn2.addEventListener('click', () => { hideLoginModal(); window.location.href = 'http://localhost:5000/auth/register'; });
+    loginBtn2.addEventListener('click', () => { hideLoginModal(); window.location.href = 'http://localhost:5000/login'; });
+    registerBtn2.addEventListener('click', () => { hideLoginModal(); window.location.href = 'http://localhost:5000/register'; });
     closeModalBtn.addEventListener('click', hideLoginModal);
     loginModal.addEventListener('click', e => { if (e.target === loginModal) hideLoginModal(); });
 
@@ -58,7 +58,7 @@ async function dynamicAuthBtns() {
         registerBtn.textContent = 'Register';
 
         loginBtn.onclick = () => {
-            window.location.href = 'http://localhost:5000/auth/login';
+            window.location.href = 'http://localhost:5000/login';
         };
         registerBtn.onclick = () => {
             window.location.href = 'http://localhost:5000/auth/register';

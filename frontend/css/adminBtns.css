@@ -27,6 +27,7 @@
   transition: background-color 0.2s ease;
   justify-content: center;
   margin-bottom: 5px;
+  transition: background-color 1s, transform 0.5s ease;
 }
 
 .more-btn {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>AirWISSEN</title>
 
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/adminBtns.css">
@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../css/posts.css">
     <link rel="stylesheet" href="../css/modals.css">
 
+    <script src="/socket.io/socket.io.js"></script>
     <script type="module" defer src="../js/main.js"></script>
 </head>
 <body>
@@ -18,24 +19,28 @@
         <div class="hamburger-menu" id="hamburgerMenu">
             <button class="hamburger-btn" id="hamburgerBtn"><img id="hamburgerBtnImg" src="./icons/bars.svg" alt="Hamburger Menu"></button>
             <nav class="hamburger-container" id="hamburgerContainer" style="display: none;">
-                <div><a href="#"> Popular Posts and Users</a></div>
+                <div><a href="/populars"> Popular Posts and Users</a></div>
             </nav>
         </div>
         <a href="/" class="site-name">AirWISSEN</a>
         <div class="auth-buttons" id="authButtons"> <!--dynamically inserted--> </div>
     </header>
 
-    <div class="main">
+    <div class="main" id="main">
         <aside class="sidebar-left">
-            <div class="panel">
-                <h3>🔥 Most Popular Messages</h3>
-                <ul id="popularPostsList"></ul>
-            </div>
+            <a href="/populars">
+                <div class="panel">
+                    <h3>🔥 Most Popular Messages</h3>
+                    <ul id="popularPostsList"> <!--dynamically inserted--> </ul>
+                </div>
+            </a>
 
-            <div class="panel">
-                <h3>🏆 Top Users</h3>
-                <ul id="topUsersList"></ul>
-            </div>
+            <a href="/populars">
+                <div class="panel">
+                    <h3>🏆 Top Users</h3>
+                    <ul id="topUsersList"> <!--dynamically inserted--> </ul>
+                </div>
+            </a>
         </aside>
         
         <main class="main-content">
@@ -55,7 +60,7 @@
     </div>
 
     <footer class="footer">
-        <p>random copyright text</p>
+        <p>&copy;AirWISSEN Sharing Platform</p>
     </footer>
 
     <!-- Login Required Modal -->

@@ -46,7 +46,9 @@ router.get('/:numberOfPosts', (req, res) => {
             const Replies = db.prepare('SELECT * FROM replies WHERE post_id = ?').all(post.id);
             detailedReplies = Replies.map(reply => {
                     const isSelfReply = false;
-                    return {...reply, isSelf: isSelfReply};
+                    const author = userDb.prepare('SELECT * FROM users WHERE username = ?').get(reply.author_username);
+                    const authorBanStatus = author.banned == 1? 'banned' : 'unbanned';
+                    return {...reply, isSelf: isSelfReply, authorBanStatus };
             });
             const votes = db.prepare('SELECT * FROM votes WHERE post_id = ?').all(post.id);
             
@@ -78,6 +80,7 @@ router.get('/:numberOfPosts', (req, res) => {
     }
 });
 
+//GET POPULAR POSTS AND USERS ROUTE
 router.get('/populars/:limit', (req, res) => {
     let limit = req.params.limit || 10;
 

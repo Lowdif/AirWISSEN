@@ -1,8 +1,7 @@
 import { isLoggedIn, isAdmin } from "./userStatus.js";
 import { loadPosts, submitReply, submitVote } from "./apis.js";
-import { deletePost, banUser, deleteReply } from "./adminActions.js";
+import { deletePost,  deleteReply, banUser, unbanUser } from "./adminActions.js";
 import { showLoginModal } from "./dynamicUI.js";
-import { unbanUser } from "./admin.js";
 
 let expendedReplies = {};
 function createPost(post, timeStamp) {
@@ -56,9 +55,9 @@ function createPost(post, timeStamp) {
             return;
         }
         voteValue = post.user_vote === 1? 0 : 1;
-        post.user_vote = voteValue;
         const isAuthorized = await submitVote(voteValue, post.id);
         if(isAuthorized == false) return;
+        post.user_vote = voteValue;
         upVoteBtn.innerHTML = post.user_vote === 1? like_solid : like_regular;
         downVoteBtn.innerHTML = post.user_vote === -1? dislike_solid : dislike_regular;
     }
@@ -70,9 +69,9 @@ function createPost(post, timeStamp) {
             return;
         }
         voteValue = post.user_vote === -1? 0 : -1;
-        post.user_vote = voteValue;
         const isAuthorized = await submitVote(voteValue, post.id);
         if(isAuthorized == false) return;
+        post.user_vote = voteValue;
         upVoteBtn.innerHTML = post.user_vote === 1? like_solid : like_regular;
         downVoteBtn.innerHTML = post.user_vote === -1? dislike_solid : dislike_regular;
     }
@@ -87,6 +86,7 @@ function createPost(post, timeStamp) {
         replyTextArea.focus();
     }
     
+    submitReplyBtn.disabled = true;
     submitReplyBtn.onclick = async () => {
         const loggedIn = await isLoggedIn();
         if(!loggedIn) {
@@ -97,6 +97,9 @@ function createPost(post, timeStamp) {
     }
 
     replyTextArea.placeholder = "write a reply...";
+    replyTextArea.addEventListener('input', () => {
+        submitReplyBtn.disabled = replyTextArea.value.trim() === '';
+    });
 
     replyBox.className = 'reply-box';
     replyBox.style.display = 'none';
@@ -192,6 +195,14 @@ function createPost(post, timeStamp) {
     return postEl;
 }
 
+function dynamicBanBtn(isBanned, post) {
+    const btn = document.createElement('button');
+    btn.textContent = isBanned == true? 'Unban User ' : 'Ban User';
+    btn.onclick = isBanned == true? () => { unbanUser(post.author_username); } : 
+    () => { banUser(post.author_username); };
+    return btn;
+}
+
 async function postsModerationUI(container, post) {
     if(post.isSelf) return;
     const isAdministrator = await isAdmin();
@@ -224,14 +235,6 @@ async function postsModerationUI(container, post) {
     });
 }
 
-function dynamicBanBtn(isBanned, post) {
-    const btn = document.createElement('button');
-    btn.textContent = isBanned == true? 'Unban User ' : 'Ban User';
-    btn.onclick = isBanned == true? () => { unbanUser(post.author_username); loadPosts() } : 
-    () => { banUser(post.author_username); };
-    return btn;
-}
-
 async function repliesModerationUI(container, post, reply) {
     if(reply.isSelf) return;
     const isAdministrator = await isAdmin();
@@ -240,7 +243,6 @@ async function repliesModerationUI(container, post, reply) {
     const moreContainer = document.createElement('div');
     const moreOptions = document.createElement('div');
     const removeReplyBtn = document.createElement('button');
-    const banUserBtn = document.createElement('button');
     const moreBtn = document.createElement('button');
     const moreIcon = '<img class = "more-icon" src="./icons/more.svg" alt="User Icon" width="8" height="16"></img>';
     moreContainer.className = 'more-container';
@@ -248,13 +250,10 @@ async function repliesModerationUI(container, post, reply) {
     removeReplyBtn.onclick = () => {
         deleteReply(post, reply);
     }
-    banUserBtn.textContent = 'Ban User';
-    banUserBtn.onclick = () => {
-        banUser(reply.author_username);
-    }
+
     moreOptions.className = 'more-options';
     moreOptions.appendChild(removeReplyBtn);
-    moreOptions.appendChild(banUserBtn);
+    moreOptions.appendChild(dynamicBanBtn(reply.authorBanStatus == 'banned', reply));
     moreOptions.style.display = 'none';
     moreBtn.className = 'more-btn';
     moreBtn.innerHTML = moreIcon;
@@ -273,6 +272,7 @@ async function addReplyToUI(container, Post, Reply) {
     const reply = document.createElement('div');
     const text = document.createElement('div');
     const replyHeader = document.createElement('div');
+    const author_username = document.createElement('strong');
 
     replyHeader.className = 'reply-header';
 
@@ -282,13 +282,23 @@ async function addReplyToUI(container, Post, Reply) {
     text.className = 'reply-text';
     text.textContent = Reply.content;
 
-    const strong = document.createElement('strong');
-    strong.textContent = `${Reply.author_username}:`;
+    author_username.textContent = `${Reply.author_username}:`;
 
-    replyHeader.appendChild(strong);
+    replyHeader.appendChild(author_username);
     repliesModerationUI(replyHeader, Post, Reply);
     reply.appendChild(replyHeader);
     reply.appendChild(text);
+
+    //specific css for banned users
+    if(Reply.authorBanStatus == 'banned'){
+        author_username.classList.add('banned-txt');
+        text.classList.add('banned-txt');
+    }
+    //to bring layout back to normal when user is unbanned
+    else {
+        author_username.classList.remove('banned-txt');
+        text.classList.remove('banned-txt');
+    }
 
   container.appendChild(reply);
 }
@@ -303,27 +313,27 @@ function updateSidebars(popularPosts, popularUsers) {
         //Popular posts list
         popularPostsList.innerHTML = '';
         popularPosts.forEach(popular => {
-            const strong = document.createElement('strong');
-            const p = document.createElement('p');
-            const div = document.createElement('div');
+            const author = document.createElement('strong');
+            const content = document.createElement('p');
+            const likes = document.createElement('div');
             const popularPost = document.createElement('div');
             popularPost.className = 'popular-post';
-            strong.textContent = `${popular.author_username}`;
-            p.textContent = `${popular.content.slice(0, 70)}${popular.content.length > 70 ? '...' : ''}`;
+            author.textContent = `${popular.author_username}`;
+            content.textContent = `${popular.content.slice(0, 70)}${popular.content.length > 70 ? '...' : ''}`;
             const totalLikes = (popular.upVotes || 0) - (popular.downVotes || 0);
-            div.textContent = `${totalLikes} like${totalLikes > 1 || totalLikes < -1 ? 's' : ''}`;
-            popularPost.appendChild(strong);
-            popularPost.appendChild(p);
-            popularPost.appendChild(div);
+            likes.textContent = `${totalLikes} like${totalLikes > 1 || totalLikes < -1 ? 's' : ''}`;
+            popularPost.appendChild(author);
+            popularPost.appendChild(content);
+            popularPost.appendChild(likes);
             popularPostsList.appendChild(popularPost);
         });      
         
         //Popular users list
         topUsersList.innerHTML = '';
         popularUsers.forEach(topUser => {
-            const li = document.createElement('li');
-            li.textContent = `${topUser[0]} (${topUser[1]} total like${topUser[1] > 1 || topUser[1] < -1 ? 's' : ''})`;
-            topUsersList.appendChild(li);
+            const user = document.createElement('li');
+            user.textContent = `${topUser[0]} (${topUser[1]} total like${topUser[1] > 1 || topUser[1] < -1 ? 's' : ''})`;
+            topUsersList.appendChild(user);
         });
     }
     catch(err) {

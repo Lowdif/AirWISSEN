@@ -10,6 +10,8 @@ const morePostsBtn = document.getElementById('morePostsBtn');
 let numberOfPosts = 10;
 let numberOfPopulars = 5;
 
+const socket = io();
+
 async function submitPost() {
     const postContent = postTextArea.value;
     if(!postContent) return;
@@ -35,10 +37,10 @@ async function submitPost() {
             return;
         }
         postTextArea.value = '';
-        loadPosts();
+        socket.emit('new post');
     }
     catch(err) {
-        console.log(err);
+        console.error(err);
     }
     finally {
         submitPostBtn.disabled = false;
@@ -64,7 +66,7 @@ async function submitVote(vote_value, post_id) {
             console.error('Something went wrong: ' + data.message)
             return;
         }
-        loadPosts();
+        socket.emit('new vote');
     }
     catch(err) {
         console.error(err);
@@ -85,12 +87,12 @@ async function submitReply(content, post_id) {
         if(!res.ok) {
             if(data.banned == true) {
                 showBanModal();
-                return;
+                return false;
             };
             console.error('Something went wrong: ' + data.message)
             return;
         }
-        loadPosts();
+        socket.emit('new reply');
     }
     catch(err) {
         console.error(err);
@@ -126,7 +128,7 @@ async function loadPosts() {
     }
     catch(err) {
         console.error(err);
-        alert('Something went wrong when trying to load the page. Please try again.')
+        alert('Something went wrong when trying to load the posts. Please try again.')
     }
 }
 
@@ -158,7 +160,6 @@ async function loadSidebars() {
 
 async function fetchWithRetry(url, options) {
     let res = await fetch(url, options);
-    console.log(res.status)
     if (res.status == 401) {
         const tokenRes = await fetch('http://localhost:5000/auth/tokens', {
             method: 'GET',
@@ -166,6 +167,10 @@ async function fetchWithRetry(url, options) {
         });
         if (tokenRes.ok) {
             res = await fetch(url, options);
+        } 
+        else {
+            const msg = await tokenRes.json();
+            console.error('Something went wrong: ' + msg.message);
         }
     }
     return res;
@@ -190,14 +195,8 @@ function initSubmitPostBtn() {
 
 function initMorePostsBtn() {
     morePostsBtn.onclick = () => { 
-        if(morePostsBtn.innerText == 'More...') {
-            numberOfPosts = 'all';
-            loadPosts();
-        }
-        else {
-            numberOfPosts = 10;
-            loadPosts();
-        }
+        numberOfPosts = morePostsBtn.innerText == 'More...' ? 'all' : 10;
+        loadPosts();
     };
 }
 

@@ -30,7 +30,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
   }
 
   try {
-    console.log('pressed')
     const response = await fetch('http://localhost:5000/auth/register', {
       method: 'POST',
       credentials: 'include',
@@ -39,7 +38,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     });
 
     if(response.ok) {
-      console.log(response.cookies);
       window.location.href = 'http://localhost:5000';
     } else {
       const data = await response.json();
