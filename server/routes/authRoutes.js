@@ -24,7 +24,7 @@ router.post('/register', async (req, res) => {
     try {
         let isAdmin = false; 
         if (process.env.ADMIN_EMAIL == email) {
-            isAdmin = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+            isAdmin = password == process.env.ADMIN_PASSWORD; //This is not safe and when releasing the website should be changed by first hashing the password in the .env file, then the using bcrypt.compare function
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const role = isAdmin? 'admin' : 'user';
